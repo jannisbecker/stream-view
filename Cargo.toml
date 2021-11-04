@@ -1,0 +1,17 @@
+[package]
+name = "stream-view"
+version = "0.1.0"
+edition = "2018"
+resolver = "2"
+
+[dependencies]
+nokhwa = { version = "0.8.0", features = ["input-msmf"] }
+glium = "0.30.2"
+
+ouroboros = "0.13"
+cgmath = "0.18"
+genmesh = "0.6"
+image = "0.23"
+obj = { version = "0.10", features = ["genmesh"] }
+rand = "0.8"
+libc = "0.2.62"
