@@ -15,10 +15,10 @@ impl VideoDevice {
         Self { device }
     }
 
-    pub fn resolution(&self) -> (u32, u32) {
-        let Resolution { width_x, height_y } = self.device.resolution();
-        (width_x, height_y)
-    }
+    // pub fn resolution(&self) -> (u32, u32) {
+    //     let Resolution { width_x, height_y } = self.device.resolution();
+    //     (width_x, height_y)
+    // }
 
     pub fn open(&mut self) {
         self.device.open_stream().unwrap();

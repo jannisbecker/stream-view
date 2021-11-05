@@ -15,13 +15,10 @@ use glium::{
     texture::{RawImage2d, SrgbTexture2d},
     Display, IndexBuffer, Program, Surface, VertexBuffer,
 };
-use std::time::{Duration, Instant};
 
 use crate::video::VideoDevice;
 
-mod support;
 mod video;
-//mod window;
 
 const WIDTH: u32 = 1280;
 const HEIGHT: u32 = 720;
