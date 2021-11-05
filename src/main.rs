@@ -163,11 +163,7 @@ fn main() {
     let index_buffer = create_index_buffer(&display);
     let program = create_shader_program(&display);
 
-    let wait_time = Duration::from_secs_f32((1 / 165) as f32);
-
     event_loop.run(move |ev, _, control_flow| {
-        *control_flow = ControlFlow::WaitUntil(Instant::now() + wait_time);
-
         match ev {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => {
@@ -181,38 +177,39 @@ fn main() {
                 StartCause::Init => (),
                 _ => return,
             },
+            Event::MainEventsCleared => {
+                let _ = rx.recv().and_then(|frame| {
+                    let image = RawImage2d::from_raw_rgb_reversed(&frame, (WIDTH, HEIGHT));
+                    let opengl_texture = SrgbTexture2d::new(&display, image).unwrap();
+
+                    // building the uniforms
+                    let uniforms = uniform! {
+                        matrix: [
+                            [1.0, 0.0, 0.0, 0.0],
+                            [0.0, 1.0, 0.0, 0.0],
+                            [0.0, 0.0, 1.0, 0.0],
+                            [0.0, 0.0, 0.0, 1.0f32]
+                        ],
+                        tex: &opengl_texture
+                    };
+
+                    let mut target = display.draw();
+                    target
+                        .draw(
+                            &vertex_buffer,
+                            &index_buffer,
+                            &program,
+                            &uniforms,
+                            &Default::default(),
+                        )
+                        .unwrap();
+
+                    target.finish().unwrap();
+
+                    Ok(())
+                });
+            }
             _ => return,
-        }
-
-        let _ = rx.recv().and_then(|frame| {
-            let image = RawImage2d::from_raw_rgb_reversed(&frame, (WIDTH, HEIGHT));
-            let opengl_texture = SrgbTexture2d::new(&display, image).unwrap();
-
-            // building the uniforms
-            let uniforms = uniform! {
-                matrix: [
-                    [1.0, 0.0, 0.0, 0.0],
-                    [0.0, 1.0, 0.0, 0.0],
-                    [0.0, 0.0, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0f32]
-                ],
-                tex: &opengl_texture
-            };
-
-            let mut target = display.draw();
-            target
-                .draw(
-                    &vertex_buffer,
-                    &index_buffer,
-                    &program,
-                    &uniforms,
-                    &Default::default(),
-                )
-                .unwrap();
-
-            target.finish().unwrap();
-
-            Ok(())
-        });
+        };
     });
 }
