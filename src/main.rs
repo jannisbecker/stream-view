@@ -15,10 +15,11 @@ use glium::{
     texture::{RawImage2d, SrgbTexture2d},
     Display, IndexBuffer, Program, Surface, VertexBuffer,
 };
+use nokhwa::{CameraFormat, FrameFormat, Resolution};
 
-use crate::video::VideoDevice;
+use crate::frame_grabber::FrameGrabber;
 
-mod video;
+mod frame_grabber;
 
 const WIDTH: u32 = 1280;
 const HEIGHT: u32 = 720;
@@ -138,14 +139,18 @@ fn create_shader_program(display: &Display) -> Program {
 fn main() {
     let (tx, rx) = mpsc::sync_channel::<Vec<u8>>(1);
 
-    thread::spawn(move || {
-        let mut video_device = VideoDevice::new();
-        video_device.open();
+    thread::spawn(move || loop {
+        let mut frame_grabber = FrameGrabber::new(
+            0,
+            Some(CameraFormat::new(
+                Resolution::new(WIDTH, HEIGHT),
+                FrameFormat::MJPEG,
+                60,
+            )),
+        );
 
-        loop {
-            let frame = video_device.grab_frame();
-            let _ = tx.send(frame);
-        }
+        let frame = frame_grabber.grab_frame();
+        let _ = tx.send(frame);
     });
 
     let event_loop = EventLoop::new();
